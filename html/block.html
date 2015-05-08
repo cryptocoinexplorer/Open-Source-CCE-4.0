@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<br />
+<div class="jumbotron">
+{% if block.Status == 'ok' %}
+    &nbsp;&nbsp;
+    <form method="get" action="/search" autocomplete="off" form style="display:inline">
+    <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
+    <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
+
+    <br />
+    <h2>Block Height: <font style="color:maroon;"> {{ block.blk[0] }}</font></h2>
+
+   </div>
+ <div class="container-fluid">
+
+    Height: {{ block.blk[0] }} <br><br>
+    Hash: {{ block.blk[1] }} <br><br>
+    Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br><br>
+    Difficulty: {{ block.blk[5] | normalize }} (Bits: {{ block.blk[4] }}) <br><br>
+    Transactions: {{ block.blk[11] }} <br><br>
+    Total Sent: {{ block.blk[12] | normalize }} <br><br>
+    Size: {{ block.blk[6] }} kilobytes<br><br>
+    Merkle Root: {{ block.blk[8] }} <br><br>
+    Nonce: {{block.blk[3] }} <br><br>
+    {% if block.poschain == 'true' %}
+        POS: {{ block.blk[9] }}
+    {% endif %}
+
+
+</div>
+<div class="container-fluid">
+<h2> Transactions </h2>
+{% for row in block.tx %}
+    <a href="/transaction?transaction={{ row [0] }}">{{ row [0] }}</a><br><br>
+{% endfor %}
+</div>
+
+{% else %}
+<br /><h1 style="text-align:center;">Block was not found.</h1></div>
+
+
+{% endif %}
+
+{% endblock %}

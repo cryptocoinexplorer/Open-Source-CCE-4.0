@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<br />
+<div class="jumbotron">
+    {% if peerinfo.Status != "error" %}
+    <h2> Coin Daemon Peers </h2>
+    </div>
+    <div class="container-fluid table-responsive">
+         <table class="table table-condensed table-striped table-hover">
+            <thead>
+                <th>IP Address</th>
+                <th>Client Version</th>
+                <th>Sub Version</th>
+            </thead>
+         <tbody>
+         {% for row in peerinfo.Data %}
+         <tr>
+        <td>{{ row[0] }}</td><td>{{ row[1] }}</td><td>{{ row[2] }}</td></tr>
+        {% endfor %}
+             </tbody>
+
+        </table>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% else %}
+    <h1 style="text-align:center;">Peer information was not found.</h1></div>
+
+
+{% endif %}
+
+
+
+
+
+{% endblock %}

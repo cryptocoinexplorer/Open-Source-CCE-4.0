@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /api/
+Disallow: /block/
+Disallow: /transaction/
+Disallow: /address/
+Disallow: /largetx/
+Disallow: /peerinfo/
+Disallow: /image/
+Disallow: /css/
+Disallow  /js/
+Disallow: /fonts/
+

@@ -1,6 +1,6 @@
-===========================================
+============================
 CCE 4  - Open Source Version
-===========================================
+============================
 
 .. contents::
 
@@ -58,7 +58,7 @@ Documentation Files
 
 * dbload.rst (Setup, configuration and operation of the database loader)
 
-* server.rst (Setup, configuration and operation of the web server)
+* web_server.rst (Setup, configuration and operation of the web server)
 
 
 

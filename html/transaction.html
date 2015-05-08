@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<br />
+<div class="jumbotron">
+    {% if transaction.Status == "ok" %}
+       &nbsp;&nbsp;
+    <form method="get" action="/search" autocomplete="off" form style="display:inline">
+    <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
+    <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
+
+    <br />
+    <h2>Transaction: <font style="color:maroon;"> {{ transaction.txout[0][0] }}</font></h2>
+    </div>
+
+<div class="container-fluid">
+
+    Block Height: <a href="/block?block={{ transaction.blk[0] }}">{{ transaction.blk[0] }}</a><br>
+    TX Hash: {{ transaction.txout[0][0] }} <br>
+    Time: {{ transaction.blk[2] }} ({{transaction.blk[2] | format_time }}) <br>
+    Number of Inputs: {{transaction.txin | length }} <br>
+    Number of Outputs: {{ transaction.txout | length}} <br>
+</div>
+
+
+<div class="container-fluid">
+<br /> <h2> Inputs</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>Index</th>
+            <th>Origin Output</th>
+            <th>Origin Address</th>
+            <th>Origin Amount</th>
+            <th>ScriptSig</th>
+        </thead>
+     <tbody>
+     {% for row in transaction.txin %}
+     <tr>
+     {% if row[1] != '0' and transaction.blk[9] == 0 %}
+         <td>0</td><td> Coinbase </td><td>Generation</td><td>{{ row[6] | normalize }}</td><td>{{ row[1] }}</td>
+     {% elif row[1] != '0' and transaction.blk[9] == 1 %}
+         <td>0</td><td> Proof of Stake Coinbase </td><td>Generated Coins are Sent in the Next Transaction</td><td>N/A</td><td>{{ row[1] }}</td>
+     {% else %}
+	    <td>{{ row[3] }}</td><td><a href="/address?address={{ row[2] }}">{{ row[2] }} </a></td><td>{{ row[7] }}</td><td>{{ row[6] | normalize }}</td><td>{{ row[4] }}</td>
+     {% endif %}
+
+         </tr>
+
+	{% endfor %}
+         </tbody>
+
+    </table>
+
+
+<br /> <h2> Outputs</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>Index</th>
+            <th>Destination Address</th>
+            <th>Amount</th>
+            <th>ScriptPubKey</th>
+        </thead>
+     <tbody>
+     {% for row in transaction.txout %}
+     <tr>
+         <td>{{ row [1] }}</td>
+      {% if row[4] == 'Unknown' %}
+         <td> Proof of Stake Coinbase</td><td>N/A</td><td>N/A</td>
+      {% else %}
+          <td><a href="/address?address={{ row[4] }}">{{ row[4] }}</a></td><td>{{ row [2] | normalize }}</td><td>{{ row[5]}}</td>
+      {% endif %}
+         </tr>
+
+	{% endfor %}
+         </tbody>
+
+    </table>
+    </div>
+
+
+{% else %}
+<h1 style="text-align:center;">Transaction information was not found.</h1></div>
+{% endif %}
+
+
+
+
+
+
+
+
+
+{% endblock %}
+

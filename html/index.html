@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block head %}
+
+{% endblock %}
+{% block content %}
+<br />
+<div class="jumbotron">
+    &nbsp;&nbsp;
+    <form method="get" action="/search" autocomplete="off" form style="display:inline">
+    <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
+    <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
+
+            <h3>&nbsp;
+    {% if stats[0] > 0 %}
+        Network Hash Rate:&nbsp;<font style="color:maroon;">{{ stats[0] | normalize }}&nbsp;{{ ratelabel }}</font>&nbsp;&nbsp;
+    {% endif %}
+    Total Coins Minted:&nbsp;<font style="color:maroon;">{{ stats[2] | normalize }}</font>
+    </h3>
+ </div>
+<div class="container-fluid table-responsive">
+     <table class="table table-condensed table-striped table-hover">
+        <thead>
+            <th>Height</th>
+            <th>Age</th>
+            <th>Transactions</th>
+            <th>Total Sent</th>
+            <th>Difficulty</th>
+            <th>Size</th>
+        </thead>
+     <tbody>
+     {% for row in topblocks %}
+     <tr>
+	<td><form method="get"><input type="submit" class="button" input name= "block" value="{{ row[0] }}" formaction="block"></form>
+		</td><td>{{ row[2] | time_passed }}</td>
+		<td>{{ row[11] }}</td><td>{{ row[12] | normalize }}</td><td>{{ row[5] | normalize }}</td><td>{{ row[6] }}</td></tr>
+	{% endfor %}
+         </tbody>
+
+    </table>
+</div>
+
+{% endblock %}

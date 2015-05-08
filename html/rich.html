@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+
+<br />
+<div class="jumbotron">
+    &nbsp;&nbsp;
+    <form method="get" action="/search" autocomplete="off" form style="display:inline">
+    <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
+    <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
+    {% if rich.Status != "error" %}
+    <h2> Top Address Balances </h2>
+    </div>
+    <div class="container-fluid table-responsive">
+         <table class="table table-condensed table-striped table-hover">
+            <thead>
+                <th>Rank</th>
+                <th>Address</th>
+                <th>Balance</th>
+                <th>Number of TX</th>
+            </thead>
+         <tbody>
+         {% for row in rich.Data %}
+         <tr>
+        <td>{{ row[0] }}</td><td><a href="/address?address={{ row[1] }}">{{ row[1] }} </a></td><td>{{ row[2] | normalize}}</td><td> {{ row[3] }}</td></tr>
+        {% endfor %}
+             </tbody>
+
+        </table>
+    </div>
+
+{% else %}
+    <h1 style="text-align:center;">Rich List was not found.</h1></div>
+
+
+{% endif %}
+
+
+
+
+
+{% endblock %}
