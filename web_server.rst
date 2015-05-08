@@ -7,7 +7,7 @@ Web Server Documentation
 Module Description
 ------------------
 
-* server.py
+* websrv.py
     The main module for the web server. Based on CherryPy runs as a daemon.
     Uses the Jinja2 HTML template system.
 
@@ -99,7 +99,7 @@ Starting the web server
 
 * Start the server with:
 
-               - python server.py
+               - python websrv.py
 
 Stopping the web server
 -----------------------
