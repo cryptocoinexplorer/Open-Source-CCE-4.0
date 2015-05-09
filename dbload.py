@@ -160,7 +160,7 @@ def process_tx(tx_hash, blk_height):
 
 
 # Parse block
-def process_block(blk_height, startmode):
+def process_block(blk_height):
     try:
         total_sent = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
@@ -181,11 +181,6 @@ def process_block(blk_height, startmode):
         conn.commit()
         ret = query_noreturn('UPDATE block SET total_sent = %s, n_tx = %s WHERE height = %s',
                              total_sent, len(block['tx']), blk_height)
-        if startmode == 'newdb' and blk_height == 101:
-                ret = query_noreturn('Truncate large_tx')
-                ret = query_noreturn('INSERT INTO large_tx SELECT tx_hash,SUM(value) FROM tx_out \
-                                    GROUP BY tx_hash ORDER BY SUM(value) DESC LIMIT 100')
-
         conn.commit()
     except Exception as e:
         return {'Status':'error','Data':e}
@@ -298,12 +293,17 @@ def main(argv):
 
             # Process blocks loop
             while blk_height <= top_height:
-                ret = process_block(blk_height,startmode)
+                ret = process_block(blk_height)
                 if ret['Status'] == 'error':
                     raise Exception(ret['Data'])
+                if startmode == 'newdb' and blk_height == 101:
+                    ret = query_noreturn('TRUNCATE large_tx')
+                    time.sleep(5)
+                    ret = query_noreturn('INSERT INTO large_tx SELECT tx_hash,SUM(value) FROM tx_out GROUP BY tx_hash ORDER BY SUM(value) DESC LIMIT 100')
+                blk_height += 1
                 if verbose:
                     print >> sys.stderr, 'Processing Block: ', blk_height, ' of ', top_height, '\r',
-                blk_height += 1
+
 
             # Call Statistics module
             if verbose:
