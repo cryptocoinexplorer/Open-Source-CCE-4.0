@@ -43,7 +43,7 @@ pool = PooledDB(pymysql, 50, db=CONFIG['database']['dbname'], host='127.0.0.1', 
                 passwd=CONFIG['database']['dbpassword'], use_unicode=True, charset="utf8",
                 setsession=['SET AUTOCOMMIT = 1'])
 
-
+# Convert Unix timestamp to date/time
 def format_time(nTime):
     try:
 
@@ -51,7 +51,7 @@ def format_time(nTime):
     except:
         return "???"
 
-
+# Convert Unix timestamp to time only
 def format_hour(nTime):
     try:
 
@@ -59,12 +59,15 @@ def format_hour(nTime):
     except:
         return "???"
 
-
+# Calculate time passed from block timestamp to server time.
 def time_passed(nTime):
     try:
         seconds = int(time.time()) - nTime
         if seconds < 0:
-            return str(abs(seconds)) + ' seconds in the future'
+            # Block is time is ahead of server time. Three examples of a response are shown.
+            # return str(abs(seconds)) + ' seconds in the future')
+            # return str('0 minutes 0 seconds')
+            return str('Ahead of server time')
         elif seconds < 60:
             return str(seconds) + ' seconds'
         else:
@@ -74,12 +77,10 @@ def time_passed(nTime):
                 return str(minutes) + ' minute ' + str(seconds) + ' seconds'
             else:
                 return str(minutes) + ' minutes'
-
-        return format_hour(nTime)
     except:
         return format_hour(nTime)
 
-
+# Trim excess zeros in a decimal
 def normalize(n):
     try:
         num = Decimal(n).normalize()
@@ -88,6 +89,8 @@ def normalize(n):
         return n
 
 
+# The next three functions are database query handlers.
+# Each one will get a connection from the pool and release it after the query is finished.
 def query_single(sql, *parms):
     try:
         db = pool.connection(shareable=False)
@@ -95,10 +98,12 @@ def query_single(sql, *parms):
         cur.execute(sql, parms)
         ret = cur.fetchone()
         cur.close()
-        db.close
+        db.close()
         return ret
     except Exception as e:
         print >> sys.stderr, e, str('query_single: ' + sql)
+        cur.close()
+        db.close()
         return None
 
 
@@ -109,10 +114,12 @@ def query_multi(sql, *parms):
         cur.execute(sql, parms)
         ret = cur.fetchall()
         cur.close()
-        db.close
+        db.close()
         return ret
     except Exception as e:
         print >> sys.stderr, e, str('query_multi: ' + sql)
+        cur.close()
+        db.close()
         return None
 
 
@@ -122,10 +129,12 @@ def query_noreturn(sql, *parms):
         cur = db.cursor()
         ret = cur.execute(sql, parms)
         cur.close()
-        db.close
+        db.close()
         return ret
     except Exception as e:
         print >> sys.stderr, e, str('query_noreturn: ' + sql)
+        cur.close()
+        db.close()
         return None
 
 
@@ -225,7 +234,7 @@ def get_rich():
 
 def get_largetx():
     try:
-        largetx = query_multi('SELECT * FROM large_tx ORDER BY amount ASC')
+        largetx = query_multi('SELECT * FROM large_tx ORDER BY amount DESC')
         if largetx is None:
             return {'Status': 'error', 'Data': 'Not Found'}
         else:

@@ -111,11 +111,15 @@ def process_tx(tx_hash, blk_height):
     ret = query_noreturn('INSERT INTO tx_raw (tx_hash,raw,decoded,height) VALUES(%s,%s,%s,%s)', tx_hash, rawtx['Data'],
                          jsn_decode, blk_height)
     total_out = Decimal(0)
+    # Transaction addresses are stored in tx_address to determine duplicate addresses in tx_in / tx_out.
+    # POS chains use the same address in both tx_in and tx_out for the generation transaction.
+    # If a duplicate address is found, the tx count for address will only be incremented once.
     tx_address = []
     for key in decode['Data']['vout']:
         try:
             key['address'] = key['scriptPubKey']['addresses'][0]
             tx_address.append(key['address'])
+        # KeyError is not fatal, as generation transactions have no tx_in address
         except KeyError:
             key['address'] = "Unknown"
         key['asm'] = key['scriptPubKey']['asm']
@@ -129,12 +133,16 @@ def process_tx(tx_hash, blk_height):
             accounting(key['address'], key['value'], True, 'add')
         conn.commit()
         total_out = Decimal(total_out + key['value'])
-        try:
-            low = query_single('SELECT * FROM large_tx ORDER BY amount ASC LIMIT 1')
-            if total_out > low[1]:
-                ret = query_noreturn('UPDATE large_tx SET tx = %s,amount = %s WHERE tx = %s', tx_hash, total_out,low[0])
-        except:
+    # If the transaction total out is larger then the lowest entry on the large tx table,
+    # replace the lowest transaction with this transaction
+    try:
+        low = query_single('SELECT * FROM large_tx ORDER BY amount ASC LIMIT 1')
+        if total_out > low[1]:
+            ret = query_noreturn('UPDATE large_tx SET tx = %s,amount = %s WHERE tx = %s', tx_hash, total_out,low[0])
+    # Exceptions in this block are non-fatal as the information value of the transaction itself far exceeds the value of large_tx
+    except:
             pass
+
     for key in decode['Data']['vin']:
         try:
             key['asm'] = key['scriptSig']['asm']
@@ -151,6 +159,8 @@ def process_tx(tx_hash, blk_height):
                 if key['address'] in tx_address:
                     count_tx = 'no'
                 accounting(key['address'],key['value_in'],False,count_tx)
+        # Exceptions occur in this loop due to POW generation transactions.
+        # The value of tx_in and tx_out are always the same in these types of transactions
         except Exception:
             key['value_in'] = total_out
         key['tx_hash'] = tx_hash
@@ -165,7 +175,7 @@ def process_block(blk_height):
         total_sent = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
         block = jsonrpc("getblock", b_hash)['Data']
-        # POS config is needed to avoid counting an extra TX on the generation address.
+        # In POS chains, nonce is used to determine if a block is POS.
         # The 'flags' field in the daemon output is unreliable due to different verbiage and multiple flags.
         # Merged mine chains also use 0 in the nonce field. This system will not work with POS merged mined chains.
         # POS merged mined compatibility will be added in the future
@@ -187,7 +197,8 @@ def process_block(blk_height):
     return {'Status':'ok'}
 
 
-# Orphan correction. Copy to orphan tables,delete block/transactions,and re-parse block.
+# Orphan correction. Copy to orphan tables,delete block/tx information, and re-parse block.
+# If recheck is true, block/tx information is not copied to orphan tables.
 def orphan(blk_height, recheck=False):
     try:
         if not recheck:
@@ -262,7 +273,7 @@ def main(argv):
             if startmode != 'newdb':
                 time.sleep(15)
 
-            # Recheck mode, re-parse the last 10 blocks in the database
+            # Recheck mode, re-parse the last 5 blocks in the database
             if startmode == 'recheck' and blk_height > 5:
                 if verbose:
                     print >> sys.stderr, "Recheck Called"

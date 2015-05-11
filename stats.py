@@ -42,7 +42,7 @@ def main():
                 'UPDATE top_address SET address = %s, balance = %s, n_tx = %s WHERE rank = %s',
                 topadd[i][0], topadd[i][1], topadd[i][2], i + 1)
 
-        # getinfo and getmininginfo from coin daemon
+        # Retrieve 'getinfo' and 'getmininginfo' from coin daemon
         ret = jsonrpc('getinfo')
         if ret['Status'] == 'error':
             errstr = 'getinfo: ' + str(ret['Data'])
@@ -59,7 +59,8 @@ def main():
         # Difficulty record
         ret = query_noreturn('UPDATE stats SET curr_diff = %s', getinfo['difficulty'])
 
-        # Coins minted record
+        # Coins minted record. Get information from coin daemon if indicated in the configuration file.
+        # If 'calc' is indicated, sum all the address balances to get the information.
         if CONFIG['stat']['mint'] == 'daemon':
             mintfield = CONFIG['stat']['mintfield']
             ret = query_noreturn('UPDATE stats SET total_mint = %s', getinfo[mintfield])
@@ -84,13 +85,13 @@ def main():
             peers = ret['Data']
         ret = query_noreturn('TRUNCATE peers')
         for row in peers:
+            # Remove port information as it is not useful information.
+            # Only information after the last ':' is removed to accommodate IPV6 addresses
             address = row['addr'].rsplit(':',1)[0]
             ret = query_noreturn('INSERT INTO peers (IP,version,sub) VALUES(%s,%s,%s)', address, row['version'],
                                  row['subver'])
         peertxt =  json.dumps(peers, sort_keys=False, indent=1)
         ret = query_noreturn('UPDATE stats SET peers = %s, peer_txt = %s', len(peers), peertxt)
-
-
 
         conn.commit()
 
@@ -98,7 +99,7 @@ def main():
     except Exception as e:
         stat_error_log(e, 'General stat module error')
 
-
+# This module can be run independent of the database loader module.
 if __name__ == '__main__':
     main()
     conn.close()

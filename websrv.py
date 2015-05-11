@@ -28,13 +28,13 @@ from cherrypy.process.plugins import Daemonizer
 from cherrypy.process.plugins import PIDFile
 from serverutil import *
 
-
+# Set up log and pid file. Run the server as a daemon.
 pid = str(os.getcwd() + "/cherrypy.pid")
 log = str(os.getcwd() + "/server.log")
-
 Daemonizer(cherrypy.engine, stderr=log).subscribe()
 PIDFile(cherrypy.engine, pid).subscribe()
 
+# Set up jinja2 environment and filters that point to functions in serverutil.py.
 templateLoader = jinja2.FileSystemLoader(searchpath=str(os.getcwd() + '/html/'))
 templateEnv = jinja2.Environment(loader=templateLoader)
 templateEnv.filters['format_time'] = format_time
@@ -165,6 +165,7 @@ class explorer:
             print >> sys.stderr, e , 'Large TX page'
             raise cherrypy.HTTPError(503)
 
+    # Explorer API. Simple commands are queried directly. More complex returns should use functions coded into serverutil.py.
     @cherrypy.expose
     def api(self, command, **args):
         try:
