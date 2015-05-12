@@ -221,7 +221,7 @@ def orphan(blk_height, recheck=False):
         ret = query_noreturn('DELETE FROM tx_in WHERE height = %s', blk_height)
         ret = query_noreturn('DELETE FROM tx_out WHERE height = %s', blk_height)
         ret = query_noreturn('DELETE FROM tx_raw WHERE height = %s', blk_height)
-        ret = process_block(blk_height,'Normal')
+        ret = process_block(blk_height)
         conn.commit()
     except Exception as e:
         loader_error_log(e, "Orphan loop error")
