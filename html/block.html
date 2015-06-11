@@ -23,19 +23,48 @@
     Size: {{ block.blk[6] }} kilobytes<br><br>
     Merkle Root: {{ block.blk[8] }} <br><br>
     Nonce: {{block.blk[3] }} <br><br>
-    {% if block.poschain == 'true' %}
-        POS: {{ block.blk[9] }}
-    {% endif %}
-
 
 </div>
+{% if block.transactions %}
 <div class="container-fluid">
-<h2> Transactions </h2>
-{% for row in block.tx %}
-    <a href="/transaction?transaction={{ row [0] }}">{{ row [0] }}</a><br><br>
-{% endfor %}
-</div>
+<br /> <h2> Transactions</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>Transaction Hash(TXID)</th>
+            <th>Input Address : Amount</th>
+            <th>Output Address : Amount</th>
+             </thead>
+     <tbody>
 
+    {% for tx in block.transactions.iteritems() %}
+    <tr><td><a href="/transaction?transaction={{ tx[0] }}">{{ tx[0] }}</a></td><td>
+        {% for address,value in tx[1].txin.iteritems() %}
+            {% if address == "POW Generation" or address == "Proof of Stake" %}
+                {{ address }}
+                    {% if value > 0 %}
+                         : {{ value |normalize }}
+                    {% endif %}
+            {% else %}
+            <a href="/address?address={{ address }}">{{ address }}</a> : {{ value | normalize }} <br>
+            {% endif %}
+        {% endfor %}
+        </td><td>
+        {% for address,value in tx[1].txout.iteritems() %}
+            {% if value == 0 %}
+                {{ address }}
+            {% else %}
+                <a href="/address?address={{ address }}">{{ address }}</a>  : {{ value | normalize }} <br>
+            {% endif %}
+        {% endfor %}
+        </td></tr>
+    {% endfor %}
+    </tbody>
+
+
+
+</table>
+</div>
+{% endif %}
 {% else %}
 <br /><h1 style="text-align:center;">Block was not found.</h1></div>
 

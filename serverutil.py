@@ -28,6 +28,7 @@ import re
 import pymysql
 from DBUtils.PooledDB import PooledDB
 from decimal import *
+from collections import OrderedDict
 
 
 # Configuration file reader
@@ -51,6 +52,7 @@ def format_time(nTime):
     except:
         return "???"
 
+
 # Convert Unix timestamp to time only
 def format_hour(nTime):
     try:
@@ -58,6 +60,7 @@ def format_hour(nTime):
         return time.strftime('%H:%M:%S', time.gmtime(int(nTime)))
     except:
         return "???"
+
 
 # Calculate time passed from block timestamp to server time.
 def time_passed(nTime):
@@ -79,6 +82,7 @@ def time_passed(nTime):
                 return str(minutes) + ' minutes'
     except:
         return format_hour(nTime)
+
 
 # Trim excess zeros in a decimal
 def normalize(n):
@@ -147,7 +151,9 @@ def homepage():
         print >> sys.stderr, e, 'Homepage'
         return {'Status': 'error', 'Data': 'Unknown error'}
 
-
+# Regular expression:  re.sub(r'[^a-zA-Z0-9]', '', <input string>)
+# The expression is used to filter out all but alpha-numeric charcters from user input.
+# This serves a security function and cuts spaces which can causes searches to fail.
 def search_type(sterm):
     try:
         sterm = str(re.sub(r'[^a-zA-Z0-9]', '', sterm))
@@ -171,25 +177,89 @@ def search_type(sterm):
         return {'Status': 'error', 'Data': 'Not Found'}
 
 
+# Block page generation is separated into 2 functions due to the complexity of the generating the block transaction display.
+# These two functions could be combined, but at the cost of reduced readability.
+# The unique function of the coinbase transaction in both POW and POS blocks, coupled with the generation aspect
+# of the second transaction in POS blocks, makes this level of complexity necessary.
+
+# The get coinbase function parses out the first tx in all blocks and the second TX in POS blocks.
+def get_coinbase(height, pos_gen_hash):
+    try:
+        base_txin = {}
+        base_txout = {}
+        tx_hash = query_single('SELECT tx_hash FROM tx_in WHERE coinbase != "0" AND height = %s', height)[0]
+        if pos_gen_hash != '0':
+            transactions[tx_hash] = {'txin': {'Proof of Stake': Decimal(0)}, 'txout': {'Generated coins sent in the next transaction': Decimal(0)}}
+            tx_hash = pos_gen_hash
+            pos_in = query_multi('SELECT address,value_in FROM tx_in WHERE tx_hash = %s', tx_hash)
+            for inrow in pos_in:
+                base_txin[inrow[0]] = inrow[1]
+            coinbase_out = query_multi('SELECT address,value FROM tx_out WHERE tx_hash = %s', tx_hash)
+        else:
+            base_txin['POW Generation'] = query_single('SELECT value_in FROM tx_in WHERE coinbase != "0" AND height = %s', height)[0]
+            coinbase_out = query_multi('SELECT address,value FROM tx_out WHERE tx_hash = %s', tx_hash)
+        for outrow in coinbase_out:
+            if outrow[0] != 'Unknown':
+                if outrow[0] in base_txout:
+                    base_txout[outrow[0]] = Decimal(base_txout[outrow[0]] + outrow[1])
+                else:
+                    base_txout[outrow[0]] = outrow[1]
+        transactions[tx_hash] = {'txin': base_txin, 'txout': base_txout}
+    except Exception as e:
+        raise Exception('Coinbase Function : ' + str(e))
+
+
 def get_block(block):
     try:
         if block == '-1':
-            blk = query_single('SELECT * FROM block ORDER BY height DESC LIMIT %s', 1)
+            blk = query_single('SELECT * FROM block ORDER BY height DESC LIMIT 1')
         elif str(block).isdigit():
             blk = query_single('SELECT * FROM block WHERE height = %s', block)
         else:
             block = str(re.sub(r'[^a-zA-Z0-9]', '', block))
             blk = query_single('SELECT * FROM block WHERE hash = %s', block)
         if blk is None:
-            raise Exception
-        ret = query_multi('SELECT tx_hash FROM tx_out WHERE height = %s', blk[0])
-        if ret[0] is None:
-            return {'Status': 'ok', 'blk': blk, 'tx': 'Not Found,'}
-        else:
-            ret = ret[::-1]
-            tx = set(ret)
-            return {'Status': 'ok', 'blk': blk, 'tx': tx, 'poschain':CONFIG['chain']['pos']}
-    except:
+            raise Exception('Block not found')
+        # Genesis block transaction parsing is skipped
+        if blk[0] == 0:
+            return {'Status': 'ok', 'blk': blk, 'transactions': None}
+        # The return dict is global to simplify the two function nature of the block page display generation.
+        global transactions
+        transactions = OrderedDict()
+        get_coinbase(blk[0], blk[9])
+        temp_txin = {}
+        temp_txout = {}
+        # Only get hashes of transactions that are not related to coinbase as those are parsed by get_coinbase
+        txhash = query_multi('SELECT tx_hash FROM tx_in WHERE height = %s AND coinbase = "0" AND tx_hash != %s GROUP BY tx_hash', blk[0], blk[9])
+        # txhash will be None if only coinbase transactions exist in the block
+        if txhash:
+            for row in txhash:
+                txin = query_multi('SELECT address,value_in FROM tx_in WHERE tx_hash = %s', row[0])
+                for inrow in txin:
+                    # Unknown addresses are from non-standard transactions that have no value with the exception
+                    # of coinbase which is handled in the get_coinbase function.
+                    if inrow[0] != 'Unknown':
+                        # If address already exists in this transaction, add to the address current value.
+                        # This is to avoid long lists of the same address with multiple tx_in values.
+                        # The same process is used below with txout.
+                        if inrow[0] in temp_txin:
+                            temp_txin[inrow[0]] = Decimal(temp_txin[inrow[0]] + inrow[1])
+                        else:
+                            temp_txin[inrow[0]] = inrow[1]
+                txout = query_multi('SELECT address,value FROM tx_out WHERE tx_hash = %s', row[0])
+                for outrow in txout:
+                    if outrow[0] != 'Unknown':
+                        if outrow[0] in temp_txout:
+                            temp_txout[outrow[0]] = Decimal(temp_txout[outrow[0]] + outrow[1])
+                        else:
+                            temp_txout[outrow[0]] = outrow[1]
+
+                transactions[row[0]] = {'txin': temp_txin, 'txout': temp_txout}
+                temp_txin = {}
+                temp_txout = {}
+        return {'Status': 'ok', 'blk': blk, 'transactions': transactions}
+    except Exception as e:
+        print >> sys.stderr, e, 'Block Page'
         return {'Status': 'error', 'Data': 'Block not found'}
 
 
@@ -231,6 +301,7 @@ def get_rich():
     except Exception as e:
         print >> sys.stderr, e, 'Rich List'
         return {'Status': 'error', 'Data': 'Unknown error'}
+
 
 def get_largetx():
     try:

@@ -172,6 +172,7 @@ def process_tx(tx_hash, blk_height):
 # Parse block
 def process_block(blk_height):
     try:
+        counter = 0
         total_sent = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
         block = jsonrpc("getblock", b_hash)['Data']
@@ -180,8 +181,13 @@ def process_block(blk_height):
         # Merged mine chains also use 0 in the nonce field. This system will not work with POS merged mined chains.
         # POS merged mined compatibility will be added in the future
         if CONFIG["chain"]["pos"] == 'true' and block['nonce'] == 0:
-            block['pos'] = True
+            counter = 1
         for key in block['tx']:
+            if counter == 1:
+                counter = 2
+            elif counter == 2:
+                block['pos'] = key
+                counter = 0
             prostx = process_tx(key, blk_height)
             if prostx['Status'] == 'error':
                 raise Exception(prostx['Data'])

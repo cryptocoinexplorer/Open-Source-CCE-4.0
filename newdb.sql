@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.43, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.24, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: opensource
 -- ------------------------------------------------------
--- Server version	5.5.43-0ubuntu0.14.04.1
+-- Server version	5.6.24-0ubuntu2
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -57,7 +57,7 @@ CREATE TABLE `block` (
   `size` mediumint(9) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `pos` tinyint(1) NOT NULL DEFAULT '0',
+  `pos` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `total_fee` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
   `total_sent` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
@@ -395,4 +395,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-05-08 10:06:34
+-- Dump completed on 2015-05-29 14:19:41

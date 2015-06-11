@@ -17,7 +17,7 @@ Module Description
 
 * stats.py
     Records statistics in the database that are stored every time the
-    dbloader is run rather then every block. These types of statistics
+    database loader is run rather then every block. These types of statistics
     are not tied to a block and generally cannot be retrieved from the
     coin daemon relative to the time they were queried from the daemon.
     For example: network hash rate. This module can be run independently.
@@ -153,3 +153,14 @@ Add the following line to the Crontab.
 
 
 Make sure to place the correct paths in 'start.sh' and place 'start.sh' in the user home directory.
+
+Fast server note
+----------------
+When creating a new database, there can be issue with the urllib3 Python module which affects the requests module .
+In a situation where the database loader is running extremely fast, the system may exhaust the max number of open TCP connections.
+This is due to urllib3 always keeping connections open for recycle with no option to turn off recycling.
+In normal server operations , this is generally not an issue as these open connections will auto close in 60 seconds.
+However, in situations where the sever is very fast, the number of connections will eventually overtake
+the maximum number of connections. In this situation lower the tcp_fin_timeout (/proc/sys/net/ipv4/tcp_fin_timeout)
+to a value around 20.
+
