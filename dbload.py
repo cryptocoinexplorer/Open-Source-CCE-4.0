@@ -323,9 +323,10 @@ def main(argv):
 
 
             # Call Statistics module
-            if verbose:
-                print >> sys.stderr, '\nCalling Statistics Module'
-            stats.main()
+            if CONFIG['loader']['stats'] == 'true':
+                if verbose:
+                    print >> sys.stderr, '\nCalling Statistics Module'
+                stats.main()
 
 
     except Exception as e:

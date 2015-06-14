@@ -28,37 +28,40 @@ Requirements for Database Loader
 * Requests
 
 Requirements for Web Server
---------------------------------------
+---------------------------
 * All the requirements for the Database Loader
 * CherryPy >= 3.6
 * Jinja2
 * DBUtils 1.1
 
+Where to Get Dependencies
+-------------------------
+* Python 2.7: (sudo) apt-get install python-dev
 
-Python 2.7: (sudo) apt-get install python-dev
+* MySQL Server: (sudo) apt-get install mysql-server
 
-MySQL Server: (sudo) apt-get install mysql-server
+* Simplejson: (sudo) apt-get install python-simplejson
 
-Simplejson: (sudo) apt-get install python-simplejson
+* Jinja2: (sudo) apt-get install python-jinja2
 
-Jinja2: (sudo) apt-get install python-jinja2
+* Requests: (sudo) apt-get install python-requests
 
-PyMySql: https://github.com/PyMySQL/PyMySQL
+    - Alternate: https://pypi.python.org/pypi/requests/
+* PyMySql: https://github.com/PyMySQL/PyMySQL
 
-Interrupting cow: https://pypi.python.org/pypi/interruptingcow
+* Interrupting cow: https://pypi.python.org/pypi/interruptingcow
 
-Requests: https://pypi.python.org/pypi/requests/
+* DBUtils 1.1: https://pypi.python.org/pypi/DBUtils
 
-DBUtils 1.1: https://pypi.python.org/pypi/DBUtils
-
-CherryPy: http://www.cherrypy.org/
+* CherryPy: http://www.cherrypy.org/
 
 Documentation Files
 -------------------
+* Located in the the docs folder
 
-* dbload.rst (Setup, configuration and operation of the database loader)
+    - dbload.rst (Setup, configuration and operation of the database loader)
 
-* web_server.rst (Setup, configuration and operation of the web server)
+    - web_server.rst (Setup, configuration and operation of the web server)
 
 
 
