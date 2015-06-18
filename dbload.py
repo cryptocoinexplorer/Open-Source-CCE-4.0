@@ -334,7 +334,7 @@ def main(argv):
         conn.close()
         os.remove(os.path.expanduser(lockdir))
         if verbose:
-            print >> sys.stderr, "\Main Loop", e
+            print >> sys.stderr, '\nMain Loop', str(e)
         sys.exit(0)
 
     # Clean up

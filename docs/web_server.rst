@@ -41,14 +41,14 @@ Configuration file (server.conf)
 Setting up with Apache2 using http_proxy
 ----------------------------------------
 
-* Enable the http_proxy mod.
+* Enable the proxy_http mod.
 
-    - sudo a2enmod http_proxy
+        - sudo a2enmod proxy_http
 
 * Virtual host file should be set up similar to this:
 
-    - Generally located at:  /etc/apache2/sites-available/<configuration file>
-    - The port number in ProxyPass and ProxyPassReverse need to match the port assigned in server.conf
+        - Generally located at:  /etc/apache2/sites-available/<configuration file>
+        - The port number in ProxyPass and ProxyPassReverse need to match the port assigned in server.conf
 
 ::
 
@@ -73,25 +73,25 @@ Setting up with Apache2 using http_proxy
 
 * Install Bootstrap3 css and js files to their appropriate css and js directory in document root.
 
-    - Alternately, find a host for bootstrap3 and change the base.html header to reflect.
+        - Alternately, find a host for bootstrap3 and change the base.html header to reflect.
 
 * If using a favicon.ico and/or robots.txt, place the file(s) in document root.
 
 * Give the Apache2 server ownership of the document root directory.
 
-    - sudo chown -R www-data <path to document root>
+        - sudo chown -R www-data <path to document root>
 
 * If this is a new configuration file, activate the virtual host.
 
-    - The configuration file must have the extension: .conf
+        - The configuration file must have the extension: .conf
 
-    - sudo a2ensite <name of the virtual host configuration file>
+        - sudo a2ensite <name of the virtual host configuration file>
 
-    - sudo service apache2 restart
+        - sudo service apache2 restart
 
 * If adding to a current running virtual host, reload the configuration.
 
-    - sudo service apache2 reload
+        - sudo service apache2 reload
 
 Starting the web server
 -----------------------

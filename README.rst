@@ -46,7 +46,7 @@ Where to Get Dependencies
 
 * Requests: (sudo) apt-get install python-requests
 
-    - Alternate: https://pypi.python.org/pypi/requests/
+        - Alternate: https://pypi.python.org/pypi/requests/
 * PyMySql: https://github.com/PyMySQL/PyMySQL
 
 * Interrupting cow: https://pypi.python.org/pypi/interruptingcow
@@ -59,9 +59,9 @@ Documentation Files
 -------------------
 * Located in the the docs folder
 
-    - dbload.rst (Setup, configuration and operation of the database loader)
+        - dbload.rst (Setup, configuration and operation of the database loader)
 
-    - web_server.rst (Setup, configuration and operation of the web server)
+        - web_server.rst (Setup, configuration and operation of the web server)
 
 
 

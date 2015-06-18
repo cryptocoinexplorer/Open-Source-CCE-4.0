@@ -119,6 +119,7 @@ Coin daemon configuration
 The coin daemon must be run with the following options in its .conf file
 ::
 
+    daemon=1
     rpcuser=<username>
     rpcpassword=<password>
     txindex=1
@@ -135,8 +136,8 @@ the coin daemon is synced and the database has been populated by the dbloader us
 Be sure to put the correct directory to dbloader in the 'coin.sh' file
 
 
-Auto start after a server reboot
---------------------------------
+Auto start after a server reboot (Optional)
+-------------------------------------------
 
 Login the user account the coin daemon/dbloader is run under.
 
