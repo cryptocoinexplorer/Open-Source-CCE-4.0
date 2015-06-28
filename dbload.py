@@ -172,6 +172,8 @@ def process_tx(tx_hash, blk_height):
 # Parse block
 def process_block(blk_height):
     try:
+        if blk_height == -1:
+            raise Exception('Bad block height (-1)')
         counter = 0
         total_sent = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
@@ -228,6 +230,8 @@ def orphan(blk_height, recheck=False):
         ret = query_noreturn('DELETE FROM tx_out WHERE height = %s', blk_height)
         ret = query_noreturn('DELETE FROM tx_raw WHERE height = %s', blk_height)
         ret = process_block(blk_height)
+        if ret['status'] == 'error':
+            raise Exception(ret['Data'])
         conn.commit()
     except Exception as e:
         loader_error_log(e, "Orphan loop error")
@@ -305,7 +309,7 @@ def main(argv):
                 for i in range(int(CONFIG['stat']['richlistlen'])):
                     ret = query_noreturn('INSERT INTO top_address (rank) VALUES(%s)', i + 1)
                 # Set up stats table
-                ret = query_noreturn('INSERT INTO stats (peer_txt,m_index) VALUES("None",1)')
+                ret = query_noreturn('INSERT INTO stats (peer_txt) VALUES("None")')
                 blk_height = 1
 
             # Process blocks loop
@@ -330,7 +334,7 @@ def main(argv):
 
 
     except Exception as e:
-        loader_error_log(e, 'Main loop')
+        loader_error_log(str(e), 'Main loop')
         conn.close()
         os.remove(os.path.expanduser(lockdir))
         if verbose:

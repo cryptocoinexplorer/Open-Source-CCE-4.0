@@ -33,7 +33,7 @@ from interruptingcow import timeout
 
 # Configuration file reader
 config_parse = ConfigParser.ConfigParser()
-config_parse.read("cce.conf")
+config_parse.read('cce.conf')
 CONFIG = {section: {option: config_parse.get(section, option) for option in config_parse.options(section)} for section
           in config_parse.sections()}
 from warnings import filterwarnings
@@ -43,14 +43,14 @@ filterwarnings(CONFIG['loader']['truncwarn'],category=pymysql.Warning)
 # Setup RPC URL and database connection
 URL = str('http://' + CONFIG["coind"]["rpcuser"] + ':' + CONFIG["coind"]["rpcpass"] + '@127.0.0.1:' + CONFIG["coind"][
     "rpcport"])
-conn = pymysql.connect(db=CONFIG["database"]["dbname"], host='127.0.0.1', port=3306, user=CONFIG["database"]["dbuser"],
-                       passwd=CONFIG["database"]["dbpassword"])
+conn = pymysql.connect(db=CONFIG['database']['dbname'], host=CONFIG['database']['mysqlip'], port=int(CONFIG['database']['mysqlport']), user=CONFIG['database']['dbuser'],
+                       passwd=CONFIG['database']['dbpassword'])
 
 
 # Error Logging
 def comm_error_log(msg, function_name='No function name provided'):
     currtime = time.strftime('%m-%d %H:%M:%S', time.gmtime())
-    logging.basicConfig(filename=str(os.getcwd() + "/comm.log"), level=logging.WARN)
+    logging.basicConfig(filename=str(os.getcwd() + '/comm.log'), level=logging.WARN)
     logging.error(currtime + ' ' + str(msg) + ' : ' + str(function_name))
 
 # Daemon RPC 
@@ -58,12 +58,11 @@ def jsonrpc(method, *params):
     try:
         headers = {'content-type': 'application/json'}
         payload = json.dumps({"method": method, 'params': params, 'jsonrpc': '2.0'})
-        # Cowtime for daemon RPC response set to 10 seconds
-        with timeout(10, exception=Exception('Connection Timeout')):
+        # Cowtime for daemon RPC response set to timeout value in configuration
+        with timeout(int(CONFIG['loader']['rpctimeout']), exception=Exception('Connection Timeout')):
             response = requests.get(URL, headers=headers, data=payload)
             if response.status_code != requests.codes.ok:
                 return {'Status': 'error', 'Data': response.status_code}
-
         if response.json()['error']:
             return {'Status': 'error', 'Data': response.json()['error']}
         return {'Status': "ok", "Data": (response.json()['result'])}

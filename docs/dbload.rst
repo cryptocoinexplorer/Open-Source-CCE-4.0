@@ -32,7 +32,13 @@ DBloader start options
 * -n New database mode
     This option is to be used when starting a new coin database. The
     database must exist and be pre-formatted with the database structure
-    in newdb.sql. The configuration file, cce.conf, must also be populated
+    in newdb.sql.
+
+        mysql -u *username* -p *password* -e "create database *database_name*"
+
+        mysql -u *username* -p *password* *database_name*  < newdb.sql
+
+    The configuration file, cce.conf, must also be populated
     with the correct parameters.
     This mode creates the genesis block in the database without any transactions.
     if desired, the genesis block transactions will need to be put into the
@@ -67,6 +73,10 @@ Configuration file (cce.conf)
             - User name for access to the database.
     - dbpassword:
             - Password for access to the database.
+    - mysqlip: (Suggested: 127.0.0.1)
+            - IP address of MySQL server
+    - mysqlport: (Suggested: 3306)
+            - MySQL server port
 
 * [coind]
     - rpcuser:
@@ -84,13 +94,17 @@ Configuration file (cce.conf)
 
 * [loader]
     - blockcheck: (Suggested: 250)
-                    - Number of blocks back to check for orphans when the loader is called.
+            - Number of blocks back to check for orphans when the loader is called.
     - stats: (Suggested: true)
-                    - Boolean indicating if the statistics module is to be run.
+            - Boolean indicating if the statistics module is to be run.
     - truncwarn: (Suggested: ignore)
-                    - Value to use for PyMySQL warnings filter. Decimal is set to 30, 12 in the database.
-                    - Since decimal types can cause unnecessary truncation warnings, ignore is the suggested setting.
-                    - To have PyMySQL warnings go to the default stderr, set this to 'always'.
+            - Value to use for PyMySQL warnings filter. Decimal is set to 30, 12 in the database.
+            - Since decimal types can cause unnecessary truncation warnings, ignore is the suggested setting.
+            - To have PyMySQL warnings go to the default stderr, set this to 'always'.
+    - rpctimeout: (**Strongly suggested to keep at 10**)
+            - RPC command timeout in seconds
+            - Should only be changed from 10 on VERY SLOW systems
+            - Consider upgrading the system if the need to change this occurs
 
 * [stat]
     - richlistlen: (Suggested: 1000)

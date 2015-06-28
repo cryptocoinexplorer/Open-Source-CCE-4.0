@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.6.24, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.43, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: opensource
 -- ------------------------------------------------------
--- Server version	5.6.24-0ubuntu2
+-- Server version	5.5.43-0ubuntu0.14.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -258,8 +258,8 @@ CREATE TABLE `stats` (
   `total_mint` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
   `peers` int(4) NOT NULL DEFAULT '0',
   `peer_txt` text COLLATE utf8_bin NOT NULL,
-  `m_index` tinyint(4) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`m_index`)
+  `db_version` decimal(4,2) NOT NULL DEFAULT '4.10',
+  PRIMARY KEY (`db_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -395,4 +395,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-05-29 14:19:41
+-- Dump completed on 2015-06-28  8:14:42

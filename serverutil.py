@@ -33,13 +33,13 @@ from collections import OrderedDict
 
 # Configuration file reader
 config_parse = ConfigParser.ConfigParser()
-config_parse.read("cce.conf")
+config_parse.read('cce.conf')
 CONFIG = {section: {option: config_parse.get(section, option) for option in config_parse.options(section)} for section
           in config_parse.sections()}
 URL = str('http://' + CONFIG["coind"]["rpcuser"] + ':' + CONFIG["coind"]["rpcpass"] + '@127.0.0.1:' + CONFIG["coind"][
     "rpcport"])
 
-pool = PooledDB(pymysql, 50, db=CONFIG['database']['dbname'], host='127.0.0.1', port=3306,
+pool = PooledDB(pymysql, 50, db=CONFIG['database']['dbname'], host=CONFIG['database']['mysqlip'], port=int(CONFIG['database']['mysqlport']),
                 user=CONFIG['database']['dbuser'],
                 passwd=CONFIG['database']['dbpassword'], use_unicode=True, charset="utf8",
                 setsession=['SET AUTOCOMMIT = 1'])
